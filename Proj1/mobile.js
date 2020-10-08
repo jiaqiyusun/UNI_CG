@@ -1,24 +1,23 @@
-/* global THREE
-    Função secundária para o createMobileLayer
-*/
-
+/* Global Variables */
 var scene, currentCamera, renderer, cameras;
 
 var geometry, material, mesh, pendulumGeometry;
-
-var controls;
 
 var mobilePiecesHash, mobileRotationHash, mobileTranslationHash;
 
 var clock;
 
+var controls;
 
+
+/* Functions */
 function createControls(camera) {
     'use strict';
 
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.addEventListener('change', renderer);
 }
+
 
 function render() {
     'use strict';
@@ -46,7 +45,7 @@ function createScene() {
     
     material = new THREE.MeshNormalMaterial({wireframe: false});
 
-    createMobile(0, 7, 0);
+    createMobile(0, 6, 0);
 }
 
 
@@ -74,12 +73,12 @@ function createOrthographicCamera(x, y, z) {
     'use strict';
 
     var camera = new THREE.OrthographicCamera(
-        -(20 * window.innerWidth/window.innerHeight) / 2,     // left
-        (20 * window.innerWidth/window.innerHeight) / 2,      // right
-        20 / 2,    //top
-        -20 / 2,     // bottom
-        1,                          // near
-        1000,                       // far
+        -(0.025 * window.innerWidth) / 2,     // left
+        (0.025 * window.innerWidth) / 2,      // right
+        (0.025 * window.innerHeight) / 2,    //top
+        -(0.025 * window.innerHeight) / 2,     // bottom
+        1,                                  // near
+        1000,                               // far
     );
     
     camera.position.set(x, y, z);
@@ -93,7 +92,7 @@ function createOrthographicCamera(x, y, z) {
 function createCameras() {
     'use strict';
 
-    cameras['freeCamera'] = createFreeCamera(0, 0, 20);
+    cameras['freeCamera'] = createFreeCamera(15, 15, 15);
     currentCamera = cameras.freeCamera;
 
     cameras['camera1'] = createOrthographicCamera(0, 0, 20);
@@ -110,7 +109,7 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-//  fazer aqui as rotações e translações
+
 function updateMobile() {
     //mobilePiecesHash.mobile.position.set(10,10,10);
     'use strict';
@@ -145,19 +144,19 @@ function updateMobile() {
 
     // Translation
     if(mobileTranslationHash.mobileLeftTranslation) {
-        mobileTranslation.x -= 1;
+        mobileTranslation.x -= 10000;
     }
     if(mobileTranslationHash.mobileRightTranslation) {
-        mobileTranslation.x += 1;
+        mobileTranslation.x += 10000;
     }
     if(mobileTranslationHash.mobileFrontTranslation) {
-        mobileTranslation.z -= 1;
+        mobileTranslation.z -= 10000;
     }
     if(mobileTranslationHash.mobileBackTranslation) {
-        mobileTranslation.z += 1;
+        mobileTranslation.z += 10000;
     }
     mobileTranslation.normalize();
-    mobilePiecesHash.mobile.position.add(mobileTranslation);
+    mobilePiecesHash.mobile.position.add(mobileTranslation.multiplyScalar(clockDelta));
 }
 
 
@@ -166,7 +165,7 @@ function createMobile(x, y, z) {
 
     var mobile = new THREE.Object3D();
 
-    createMobileLayer(mobile, 0, 0, 0, 1, "cone");
+    createMobileLayer(mobile, 0, 0, 0, "cone");
 
     createMobileSecondPiece(mobile);
 
@@ -182,8 +181,8 @@ function createMobileSecondPiece(obj) {
 
     var mobileSecondPiece = new THREE.Object3D();
 
-    createMobileLayer(mobileSecondPiece, 0, -3, 0, 2, "cube");
-    createMobileLayer(mobileSecondPiece,0, -6, 0, 1, "ball");
+    createMobileLayer(mobileSecondPiece, 0, -3, 0, "cube");
+    mobileSecondPiece.position.set(4.5,0,0);
 
     createMobileThirdPiece(mobileSecondPiece);
 
@@ -197,14 +196,15 @@ function createMobileThirdPiece(obj) {
 
     var mobileThirdPiece = new THREE.Object3D();
 
-    createMobileLayer(mobileThirdPiece, 0, -9, 0, 3, null);
+    createMobileLayer(mobileThirdPiece, 0, -6, 0, "ball");
+    mobileThirdPiece.position.set(-4.5,0,0);
 
     obj.add(mobileThirdPiece);
     mobilePiecesHash['mobileThirdPiece'] = mobileThirdPiece;
 }
 
 
-function createMobileLayer(obj, x, y, z, pendulumSetUp, pendulumType) { // pendulumSetUp (1- 4 pendulos, 2- 2 pendulos, 3- 5 pendulos)
+function createMobileLayer(obj, x, y, z, pendulumType) {
     'use strict';
 
     var layer = new THREE.Object3D();
@@ -238,111 +238,30 @@ function createMobileLayer(obj, x, y, z, pendulumSetUp, pendulumType) { // pendu
         pendulumGeometry = new THREE.SphereGeometry(0.5, 10, 10);
     }
 
-    // pendulum sticks
-    geometry = new THREE.CylinderGeometry(0.1, 0.1, 1.2);
-
-    if(pendulumSetUp == 1) {
-        // four small vertical stick
-        mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(-7, -3.5, 0);
-        layer.add(mesh);
-        mesh = new THREE.Mesh(pendulumGeometry, material);
-        mesh.position.set(-7, -4.5, 0)
-        mesh.rotateZ(Math.PI);
-        layer.add(mesh);
-        
-        mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(-2, -3.5, 0);
-        layer.add(mesh);
-        mesh = new THREE.Mesh(pendulumGeometry, material);
-        mesh.position.set(-2, -4.5, 0)
-        mesh.rotateZ(Math.PI);
-        layer.add(mesh);
-
-        mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(2, -3.5, 0);
-        layer.add(mesh);
-        mesh = new THREE.Mesh(pendulumGeometry, material);
-        mesh.position.set(2, -4.5, 0)
-        mesh.rotateZ(Math.PI);
-        layer.add(mesh);
-
-        mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(7, -3.5, 0);
-        layer.add(mesh);
-        mesh = new THREE.Mesh(pendulumGeometry, material);
-        mesh.position.set(7, -4.5, 0);
-        mesh.rotateZ(Math.PI);
-        layer.add(mesh);
-    }
-
-    else if(pendulumSetUp == 2) {
-        // two small vertical stick
-        mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(-4, -3.5, 0);
-        layer.add(mesh);
-        mesh = new THREE.Mesh(pendulumGeometry, material);
-        mesh.position.set(-4, -4.5, 0);
-        mesh.rotateZ(Math.PI);
-        layer.add(mesh);
-
-        mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(4, -3.5, 0);
-        layer.add(mesh);
-        mesh = new THREE.Mesh(pendulumGeometry, material);
-        mesh.position.set(4, -4.5, 0);
-        mesh.rotateZ(Math.PI);
-        layer.add(mesh);
-    }
-
-    else if(pendulumSetUp == 3) {
-        // five small vertical stick
-        mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(-6, -3.5, 0);
-        layer.add(mesh);
-        pendulumGeometry = new THREE.ConeGeometry(0.5, 1);
-        mesh = new THREE.Mesh(pendulumGeometry, material);
-        mesh.position.set(-6, -4.5, 0);
-        mesh.rotateZ(Math.PI);
-        layer.add(mesh);
-
-        mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(-3, -3.5, 0);
-        layer.add(mesh);
-        pendulumGeometry = new THREE.BoxGeometry(1,1,1);
-        mesh = new THREE.Mesh(pendulumGeometry, material);
-        mesh.position.set(-3, -4.5, 0);
-        layer.add(mesh);
-
-        mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(0, -3.5, 0);
-        layer.add(mesh);
-        pendulumGeometry = new THREE.SphereGeometry(0.5, 10, 10);
-        mesh = new THREE.Mesh(pendulumGeometry, material);
-        mesh.position.set(0, -4.5, 0);
-        layer.add(mesh);
-
-        mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(3, -3.5, 0);
-        layer.add(mesh);
-        pendulumGeometry = new THREE.BoxGeometry(1,1,1);
-        mesh = new THREE.Mesh(pendulumGeometry, material);
-        mesh.position.set(3, -4.5, 0);
-        layer.add(mesh);
-        
-        mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(6, -3.5, 0);
-        layer.add(mesh);
-        pendulumGeometry = new THREE.ConeGeometry(0.5, 1);
-        mesh = new THREE.Mesh(pendulumGeometry, material);
-        mesh.position.set(6, -4.5, 0);
-        mesh.rotateZ(Math.PI);
-        layer.add(mesh);
-    }
+    // four small vertical stick with pendulum
+    createPendulumOnLayer(-7, layer);
+    createPendulumOnLayer(-2, layer);
+    createPendulumOnLayer(2, layer);
+    createPendulumOnLayer(7, layer);
 
     layer.position.set(x,y,z);
 
     obj.add(layer);
+}
+
+
+function createPendulumOnLayer(x, obj) {
+    geometry = new THREE.CylinderGeometry(0.1, 0.1, 1.2);
+
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, -3.5, 0);
+    obj.add(mesh);
+
+    mesh = new THREE.Mesh(pendulumGeometry, material);
+    mesh.position.set(x, -4.5, 0)
+    mesh.rotateZ(Math.PI);
+    mesh.scale.set(1,1,0.5);
+    obj.add(mesh);
 }
 
 
@@ -382,14 +301,14 @@ function resizeOrthographicalCamera(camera) {
     'use strict';
 
     if (window.innerHeight > 0 && window.innerWidth > 0) {
-        camera.left = -(20 * window.innerWidth/window.innerHeight) / 2;
-        camera.right =  (20 * window.innerWidth/window.innerHeight) / 2;
-        camera.top = 20 / 2;
-        camera.bottom = -20 / 2;
+        camera.left = -0.025 * window.innerWidth / 2,     // left
+        camera.right = 0.025 * window.innerWidth / 2,      // right
+        camera.top = 0.025 * window.innerHeight / 2,    //top
+        camera.bottom = -0.025 * window.innerHeight / 2,     // bottom
+
         camera.updateProjectionMatrix();
     }
 }
-
 
 
 function resizeFreeCamera() {
@@ -535,3 +454,4 @@ function initHashs() {
     mobileTranslationHash['mobileLeftTranslation'] = false;
     mobileTranslationHash['mobileRightTranslation'] = false;
 }
+
