@@ -144,19 +144,19 @@ function updateMobile() {
 
     // Translation
     if(mobileTranslationHash.mobileLeftTranslation) {
-        mobileTranslation.x -= 10000;
+        mobileTranslation.x -= 1;
     }
     if(mobileTranslationHash.mobileRightTranslation) {
-        mobileTranslation.x += 10000;
+        mobileTranslation.x += 1;
     }
     if(mobileTranslationHash.mobileFrontTranslation) {
-        mobileTranslation.z -= 10000;
+        mobileTranslation.z -= 1;
     }
     if(mobileTranslationHash.mobileBackTranslation) {
-        mobileTranslation.z += 10000;
+        mobileTranslation.z += 1;
     }
     mobileTranslation.normalize();
-    mobilePiecesHash.mobile.position.add(mobileTranslation.multiplyScalar(clockDelta));
+    mobilePiecesHash.mobile.position.add(mobileTranslation.multiplyScalar(clockDelta * 10));
 }
 
 
@@ -338,6 +338,12 @@ function onKeyDown(key) {
         case 51: //3
             currentCamera = cameras.camera3;
             break;
+
+        // Wireframe
+        case 52: //4
+            material.wireframe = !material.wireframe
+            break;
+
         // Rotation
         case 81: //Q
         case 113: //q
