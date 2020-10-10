@@ -251,6 +251,8 @@ function createMobileLayer(obj, x, y, z, pendulumType) {
 
 
 function createPendulumOnLayer(x, obj) {
+    'use strict';
+
     geometry = new THREE.CylinderGeometry(0.1, 0.1, 1.2);
 
     mesh = new THREE.Mesh(geometry, material);
@@ -258,7 +260,7 @@ function createPendulumOnLayer(x, obj) {
     obj.add(mesh);
 
     mesh = new THREE.Mesh(pendulumGeometry, material);
-    mesh.position.set(x, -4.5, 0)
+    mesh.position.set(x, -4.5, 0);
     mesh.rotateZ(Math.PI);
     mesh.scale.set(1,1,0.5);
     obj.add(mesh);
