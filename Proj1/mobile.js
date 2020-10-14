@@ -111,7 +111,6 @@ function animate() {
 
 
 function updateMobile() {
-    //mobilePiecesHash.mobile.position.set(10,10,10);
     'use strict';
 
     var clockDelta = clock.getDelta();
@@ -462,4 +461,3 @@ function initHashs() {
     mobileTranslationHash['mobileLeftTranslation'] = false;
     mobileTranslationHash['mobileRightTranslation'] = false;
 }
-
