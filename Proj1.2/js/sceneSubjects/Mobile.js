@@ -122,7 +122,7 @@ class Mobile {
         obj.add(mesh);
     }
 
-     update(clockDelta) {
+     update(time) {
         'use strict';
 
         var mobileRotation = 0, mobileSecondPieceRotation = 0, mobileThirdPieceRotation = 0;
@@ -147,9 +147,9 @@ class Mobile {
         if(this.mobileRotationHash.mobileThirdPieceRightRotation) {
             mobileThirdPieceRotation += 1;
         }
-        this.mobile.rotateY(mobileRotation * clockDelta);
-        this.mobileSecondPiece.rotateY(mobileSecondPieceRotation * clockDelta);
-        this.mobileThirdPiece.rotateY(mobileThirdPieceRotation * clockDelta);
+        this.mobile.rotateY(mobileRotation * time);
+        this.mobileSecondPiece.rotateY(mobileSecondPieceRotation * time);
+        this.mobileThirdPiece.rotateY(mobileThirdPieceRotation * time);
 
         // Translation
         if(this.mobileTranslationHash.mobileLeftTranslation) {
@@ -165,7 +165,94 @@ class Mobile {
             mobileTranslation.z += 1;
         }
         mobileTranslation.normalize();
-        this.mobile.position.add(mobileTranslation.multiplyScalar(clockDelta * 10));
+        this.mobile.position.add(mobileTranslation.multiplyScalar(time * 10));
     }
 
+    onKeyDown(key) {
+        'use strict'
+        switch (key.keyCode) {
+            // Wireframe
+            case 52: //4
+                this.material.wireframe = !this.material.wireframe
+                break;
+    
+            // Rotation
+            case 81: //Q
+                this.mobileRotationHash.mobileLeftRotation = true;
+                break;
+            case 69: //E
+                this.mobileRotationHash.mobileRightRotation = true;
+                break;
+    
+            case 65: //A
+                this.mobileRotationHash.mobileSecondPieceLeftRotation = true;
+                break;
+            case 68: //D
+                this.mobileRotationHash.mobileSecondPieceRightRotation = true;
+                break;
+    
+            case 90: //Z
+                this.mobileRotationHash.mobileThirdPieceLeftRotation = true;
+                break;
+            case 67: //C
+                this.mobileRotationHash.mobileThirdPieceRightRotation = true;
+                break;
+    
+            // Translation
+            case 37: // leftArrow
+                this.mobileTranslationHash.mobileLeftTranslation = true;
+                break;
+            case 38: // upArrow
+                this.mobileTranslationHash.mobileFrontTranslation = true;
+                break;
+            case 39: // rightArrow
+                this.mobileTranslationHash.mobileRightTranslation = true;
+                break;
+            case 40: // downArrow
+                this.mobileTranslationHash.mobileBackTranslation = true;
+                break;
+    
+        }
+    }
+
+    onKeyUp(key) {
+        'use strict'
+        switch (key.keyCode) {
+                // Rotation
+                case 81: //Q
+                    this.mobileRotationHash.mobileLeftRotation = false;
+                    break;
+                case 69: //E
+                    this.mobileRotationHash.mobileRightRotation = false;
+                    break;
+        
+                case 65: //A
+                    this.mobileRotationHash.mobileSecondPieceLeftRotation = false;
+                    break;
+                case 68: //D
+                    this.mobileRotationHash.mobileSecondPieceRightRotation = false;
+                    break;
+        
+                case 90: //Z
+                    this.mobileRotationHash.mobileThirdPieceLeftRotation = false;
+                    break;
+                case 67: //C
+                    this.mobileRotationHash.mobileThirdPieceRightRotation = false;
+                    break;
+        
+                // Translation
+                case 37: // leftArrow
+                    this.mobileTranslationHash.mobileLeftTranslation = false;
+                    break;
+                case 38: // upArrow
+                    this.mobileTranslationHash.mobileFrontTranslation = false;
+                    break;
+                case 39: // rightArrow
+                    this.mobileTranslationHash.mobileRightTranslation = false;
+                    break;
+                case 40: // downArrow
+                    this.mobileTranslationHash.mobileBackTranslation = false;
+                    break;
+            }
+    }
 }

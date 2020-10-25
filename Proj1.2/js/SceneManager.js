@@ -1,16 +1,3 @@
-// TODO
-
-// METER UMA BOLA A ANDAR NA MESA
-// METER A BOLA A COLIDIR COM A PAREDE
-// METER MOVIMENTO UNIFORMEMENTE RETARDADO NA BOLA
-// METER UMA BOLA NO CENTRO
-// METER A BOLA A COLIDIR COM A BOLA DO CENTRO
-// RODAR O TACO SELECIONADO
-// METER LIMITES NA ROTACAO DO TACO SELECIONADO
-// METER 15 BOLAS ALEATORIAS NA MESA
-// METER UMA BOLA NO TACO SELECIONADO
-// DISPARAR A BOLA
-
 class SceneManager {
     constructor(canvas) {
 
@@ -25,8 +12,6 @@ class SceneManager {
         this.renderer = this.buildRender(this.screenDimensions);
         this.cameras = this.buildCameras(this.screenDimensions);
         this.sceneSubjects = this.createSceneSubjects(this.scene);
-
-        this.selectedCueStick = 0;
     }
 
     buildScene() {
@@ -50,11 +35,12 @@ class SceneManager {
 
     buildCameras({ width, height }) {
         var cameras = new Object()
-        cameras['freeCamera'] = this.createFreeCamera(25, 25, 25, { width, height });
+        cameras['freeCamera'] = this.createFreeCamera(15, 15, 15, { width, height });
         this.currentCamera = cameras.freeCamera;
     
-        cameras['camera1'] = this.createOrthographicCamera(0, 20, 0, { width, height });
-        cameras['camera2'] = this.createPerspectiveCamera(0, 15, 15, { width, height });
+        cameras['camera1'] = this.createOrthographicCamera(0, 0, 20, { width, height });
+        cameras['camera2'] = this.createOrthographicCamera(0, 20, 0, { width, height });
+        cameras['camera3'] = this.createOrthographicCamera(20, 0, 0, { width, height });
 
         return cameras;
     }
@@ -65,29 +51,24 @@ class SceneManager {
     }
 
     createFreeCamera(x, y, z, { width, height }) {
-        let freeCamera = this.createPerspectiveCamera(x, y, z, { width, height })
-        this.createControls(freeCamera);
-
-        return freeCamera;
-    }
-
-    createPerspectiveCamera(x, y, z, { width, height }) {
-        let camera = new THREE.PerspectiveCamera(
+        var freeCamera = new THREE.PerspectiveCamera(
             70,     // FOV
             width / height,     // Aspect Ratio
             1,      // Near plane
             1000        //Far plane
         );
     
-        camera.position.set(x, y, z);
-        camera.lookAt(this.scene.position);
-        this.scene.add(camera);
-        
-        return camera;
+        freeCamera.position.set(x, y, z);
+        freeCamera.lookAt(this.scene.position);
+        this.scene.add(freeCamera);
+    
+        this.createControls(freeCamera);
+    
+        return freeCamera;
     }
 
     createOrthographicCamera(x, y, z, { width, height }) {
-        let camera = new THREE.OrthographicCamera(
+        var camera = new THREE.OrthographicCamera(
             -(0.025 * width) / 2,     // left
             (0.025 * width) / 2,      // right
             (0.025 * height) / 2,    //top
@@ -104,15 +85,9 @@ class SceneManager {
     }
 
     createSceneSubjects(scene) {
-        const sceneSubjects = {}
-        sceneSubjects["snookerTable"] = new SnookerTable(scene, 0, 0, 0);
-        sceneSubjects["cueStick4"] = new CueStick(4, scene, -7.5, 0.2, -13, "long");
-        sceneSubjects["cueStick5"] = new CueStick(5, scene, 7.5, 0.2, -13, "long");
-        sceneSubjects["cueStick6"] = new CueStick(6, scene, -7.5, 0.2, 13, "long");
-        sceneSubjects["cueStick7"] = new CueStick(7, scene, 7.5, 0.2, 13, "long");
-        sceneSubjects["cueStick8"] = new CueStick(8, scene, -20.5, 0.2, 0, "short");
-        sceneSubjects["cueStick9"] = new CueStick(9, scene, 20.5, 0.2, 0, "short");
-
+        const sceneSubjects = [
+            new Mobile(scene, 0, 6, 0)
+        ];
 
         return sceneSubjects;
     }
@@ -120,11 +95,9 @@ class SceneManager {
     update() {
         const clockDelta = this.clock.getDelta();
 
-        for (var subject in this.sceneSubjects) {
-            if(typeof this.sceneSubjects[subject].update === "function"){
-                this.sceneSubjects[subject].update(clockDelta);
-            }
-        }
+        for (let i = 0; i < this.sceneSubjects.length; i++)
+            this.sceneSubjects[i].update(clockDelta);
+
         this.renderer.render(this.scene, this.currentCamera);
     };
 
@@ -136,17 +109,17 @@ class SceneManager {
         
         this.renderer.setSize(width, height);
 
-        this.resizePerspectiveCamera(this.cameras.freeCamera);
+        this.resizeFreeCamera();
         this.resizeOrthographicalCamera(this.cameras.camera1);
-        this.resizePerspectiveCamera(this.cameras.camera2);
+        this.resizeOrthographicalCamera(this.cameras.camera2);
+        this.resizeOrthographicalCamera(this.cameras.camera3);
     
     };
 
-    resizePerspectiveCamera(camera) {
+    resizeFreeCamera() {
         if (this.screenDimensions.height > 0 && this.screenDimensions.width > 0) {
-            camera.aspect = this.screenDimensions.width / this.screenDimensions.height;
-
-            camera.updateProjectionMatrix();
+            this.cameras.freeCamera.aspect = this.screenDimensions.width / this.screenDimensions.height;
+            this.cameras.freeCamera.updateProjectionMatrix();
         }
     }
 
@@ -162,10 +135,10 @@ class SceneManager {
     }
 
     onKeyDown(key) {
-        for (var subject in this.sceneSubjects)
-            if(typeof this.sceneSubjects[subject].onKeyDown === "function")
-                this.sceneSubjects[subject].onKeyDown(key);
-
+        for (let i = 0; i < this.sceneSubjects.length; i++)
+            if(typeof this.sceneSubjects[i].onKeyDown === "function")
+                this.sceneSubjects[i].onKeyDown(key);
+            
         switch (key.keyCode) {
             // Camera
             case 48: //0
@@ -177,39 +150,17 @@ class SceneManager {
             case 50: //2
                 this.currentCamera = this.cameras.camera2;
                 break;
-
-            // CueStick
-            case 52: //4
-                this.selectedCueStick = 4;
-                break;
-            case 53: //5
-                this.selectedCueStick = 5;
-                break;
-            case 54: //6
-                this.selectedCueStick = 6;
-                break;
-            case 55: //7
-                this.selectedCueStick = 7;
-                break;
-            case 56: //8
-                this.selectedCueStick = 8;
-                break;
-            case 57: //9
-                // ASK
-                // if(this.selectedCueStick != 9 && this.selectedCueStick != 0)
-                //     this.sceneSubjects["cueStick"+this.selectedCueStick].togleCueStick();
-                this.selectedCueStick = 9;
-                // this.sceneSubjects["cueStick9"].togleCueStick();
+            case 51: //3
+                this.currentCamera = this.cameras.camera3;
                 break;
         }
     }   
     
     
     onKeyUp(key) {
-        for (var subject in this.sceneSubjects)
-            if(typeof this.sceneSubjects[subject].onKeyUp === "function")
-                this.sceneSubjects[subject].onKeyUp(key);
-
+        for (let i = 0; i < this.sceneSubjects.length; i++)
+            if(typeof this.sceneSubjects[i].onKeyUp === "function")
+                this.sceneSubjects[i].onKeyUp(key);
         switch (key.keyCode) {
 
         }
