@@ -38,7 +38,7 @@ class SnookerTable {
     
     addWallBotton(obj, x, y, z){
         'use strict';
-        let geometry = new THREE.CubeGeometry(60, 0.2, 30);
+        let geometry = new THREE.CubeGeometry(61, 0.2, 31);
         let mesh = new THREE.Mesh(geometry, this.materials["table"]);
         mesh.position.set(x, y, z);
     
@@ -50,19 +50,19 @@ class SnookerTable {
     
         var table = new THREE.Object3D();
         
-        this.addWallBotton(table, 0, -0.2, 0);
+        this.addWallBotton(table, 0, 0, 0);
     
-        this.addWallShort(table, 30, 0, 0);
-        this.addWallShort(table, -30, 0, 0);
-        this.addWallLong(table, 0, 0, 15);
-        this.addWallLong(table, 0, 0, -15);
+        this.addWallShort(table, 30, 1.5, 0);
+        this.addWallShort(table, -30, 1.5, 0);
+        this.addWallLong(table, 0, 1.5, 15);
+        this.addWallLong(table, 0, 1.5, -15);
     
-        this.addHole(table, 28, -0.2, 13);
-        this.addHole(table, -28, -0.2, 13);
-        this.addHole(table, 28, -0.2, -13);
-        this.addHole(table, -28, -0.2, -13);
-        this.addHole(table, 0, -0.2, 13);
-        this.addHole(table, 0, -0.2, -13);
+        this.addHole(table, 28, 0, 13);
+        this.addHole(table, -28, 0, 13);
+        this.addHole(table, 28, 0, -13);
+        this.addHole(table, -28, 0, -13);
+        this.addHole(table, 0, 0, 13);
+        this.addHole(table, 0, 0, -13);
         
         table.position.x = x;
         table.position.y = y;

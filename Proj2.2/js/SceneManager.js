@@ -112,7 +112,7 @@ class SceneManager {
         sceneSubjects["cueStick7"] = new CueStick(7, scene, 7.5, 0.2, 13, "long");
         sceneSubjects["cueStick8"] = new CueStick(8, scene, -20.5, 0.2, 0, "short");
         sceneSubjects["cueStick9"] = new CueStick(9, scene, 20.5, 0.2, 0, "short");
-
+        sceneSubjects["ball"] = new Ball(scene, 0, 0.8, 0);
 
         return sceneSubjects;
     }
