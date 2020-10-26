@@ -1,13 +1,8 @@
 // TODO
 
-// METER UMA BOLA A ANDAR NA MESA
-// METER A BOLA A COLIDIR COM A PAREDE
-// METER MOVIMENTO UNIFORMEMENTE RETARDADO NA BOLA
-// METER UMA BOLA NO CENTRO
-// METER A BOLA A COLIDIR COM A BOLA DO CENTRO
+// METER A BOLA A COLIDIR COM BOLA
 // RODAR O TACO SELECIONADO
 // METER LIMITES NA ROTACAO DO TACO SELECIONADO
-// METER 15 BOLAS ALEATORIAS NA MESA
 // METER UMA BOLA NO TACO SELECIONADO
 // DISPARAR A BOLA
 
@@ -27,6 +22,10 @@ class SceneManager {
         this.sceneSubjects = this.createSceneSubjects(this.scene);
 
         this.selectedCueStick = 0;
+    }
+
+    getRandomNumber(max, min) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
     }
 
     buildScene() {
@@ -112,13 +111,18 @@ class SceneManager {
         sceneSubjects["cueStick7"] = new CueStick(7, scene, 7.5, 0.2, 13, "long");
         sceneSubjects["cueStick8"] = new CueStick(8, scene, -20.5, 0.2, 0, "short");
         sceneSubjects["cueStick9"] = new CueStick(9, scene, 20.5, 0.2, 0, "short");
-        sceneSubjects["ball"] = new Ball(scene, 0, 0.8, 0);
+        for(let i = 0; i < 15; i++)
+            sceneSubjects["ball"+i] = new Ball(scene, this.getRandomNumber(-14,14), 0.75, this.getRandomNumber(-7.5,7.5), this.getRandomNumber(-5,5), this.getRandomNumber(-5,5));
 
         return sceneSubjects;
     }
 
     update() {
         const clockDelta = this.clock.getDelta();
+
+        for (let i = 0; i < 15; i++) {
+            this.detectCollision(this.sceneSubjects["ball"+i]);
+        }
 
         for (var subject in this.sceneSubjects) {
             if(typeof this.sceneSubjects[subject].update === "function"){
@@ -127,6 +131,56 @@ class SceneManager {
         }
         this.renderer.render(this.scene, this.currentCamera);
     };
+
+    detectCollision(ball) {
+        var inHole = false;
+        for (var wall in this.sceneSubjects.snookerTable.walls) {
+            if (wall !== ball.lastCollision && this.checkCollision(ball.ball, this.sceneSubjects.snookerTable.walls[wall])) {
+                for (var hole in this.sceneSubjects.snookerTable.holes) {
+                    if (this.checkCollision(ball.ball, this.sceneSubjects.snookerTable.holes[hole])) {
+                        inHole = true;
+                    }
+                }
+                this.updateBallDirection(ball, wall, inHole);
+                ball.lastCollision = wall;
+            }
+
+        }
+    }
+
+    checkCollision(obj1, obj2) {
+        obj1.updateMatrixWorld();
+        obj2.updateMatrixWorld();
+        obj1.geometry.computeBoundingSphere();
+        obj2.geometry.computeBoundingBox();
+        var box1 = obj1.geometry.boundingSphere.clone();
+        box1.applyMatrix4(obj1.matrixWorld);
+        var box2 = obj2.geometry.boundingBox.clone();
+        box2.applyMatrix4(obj2.matrixWorld);
+
+        return box1.intersectsBox(box2);
+    }
+
+    updateBallDirection(ball, wall, inHole) {
+        // METER EM FUNCOES DA BALL
+        
+        if (inHole) {
+            ball.direction.set(0, -1, 0);
+            ball.zVel = 0;
+            ball.xVel = 0;
+            return;
+        }
+
+        if (wall === 'down' || wall === 'up') {
+            ball.direction.z *= -1;
+            ball.zVel *= -1;
+        }
+
+        if (wall === 'right' || wall === 'left') {
+            ball.direction.x *= -1;
+            ball.xVel *= -1;
+        }
+    }
 
     onWindowResize() {
         const { width, height } = canvas;
@@ -195,11 +249,7 @@ class SceneManager {
                 this.selectedCueStick = 8;
                 break;
             case 57: //9
-                // ASK
-                // if(this.selectedCueStick != 9 && this.selectedCueStick != 0)
-                //     this.sceneSubjects["cueStick"+this.selectedCueStick].togleCueStick();
                 this.selectedCueStick = 9;
-                // this.sceneSubjects["cueStick9"].togleCueStick();
                 break;
         }
     }   
