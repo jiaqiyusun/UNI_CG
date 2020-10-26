@@ -1,6 +1,43 @@
 var camera, scene, renderer;
 var material, geometry, mesh;
 
+var wires = true;
+
+class Entity extends THREE.Object3D{
+    constructor(){
+        super();
+        this.velocity = new THREE.Vector3();
+		this.aceleration = new THREE.Vector3();
+		this.maxvel = new THREE.Vector3();
+		this.minvel = new THREE.Vector3();
+		this.width = 0;
+		this.height = 0;
+		this.radius = 0;
+    }
+}
+
+function addStickVertical(obj, x, y, z){
+    'use strict';
+    material = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true});
+    geometry = new THREE.CylinderGeometry(0.5, 0.5, 8);
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.rotateZ(Math.PI/2);
+    mesh.position.set(x, y, z);
+
+    obj.add(mesh);
+}
+
+function addStickHorizontal(obj, x, y, z){
+    'use strict';
+    material = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true});
+    geometry = new THREE.CylinderGeometry(0.5, 0.5, 8);
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.rotateX(Math.PI/2);
+    mesh.position.set(x, y, z);
+
+    obj.add(mesh);
+}
+
 function addHole(obj, x, y, z){
     'use strict';
     material = new THREE.MeshBasicMaterial({color: 0x000000, wireframe: true});
@@ -38,7 +75,7 @@ function addTableWallBotton(obj, x, y, z){
     'use strict';
 
     material = new THREE.MeshBasicMaterial({ color: 0x006800, wireframe: true });
-    geometry = new THREE.CubeGeometry(60, 0.2, 20);
+    geometry = new THREE.CubeGeometry(60, 0.5, 20);
     mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(x, y, z);
 
@@ -50,7 +87,7 @@ function createTable(x, y, z) {
 
     var table = new THREE.Object3D();
     
-    addTableWallBotton(table, 0, -0.2, 0);
+    addTableWallBotton(table, 0, -0.5, 0);
 
     addTableWallShort(table, 30, 0, 0);
     addTableWallShort(table, -30, 0, 0);
@@ -63,6 +100,13 @@ function createTable(x, y, z) {
     addHole(table, -28, -0.2, -8);
     addHole(table, 0, -0.2, 8);
     addHole(table, 0, -0.2, -8);
+
+    addStickHorizontal(table, 15, 0.5, 14);
+    addStickHorizontal(table, -15, 0.5, 14);
+    addStickHorizontal(table, 15, 0.5, -14);
+    addStickHorizontal(table, -15, 0.5, -14);
+    addStickVertical(table, 34, 0.5, 0);
+    addStickVertical(table, -34, 0.5, 0);
 
     scene.add(table);
 
