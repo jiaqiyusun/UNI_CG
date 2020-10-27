@@ -1,10 +1,8 @@
 // TODO
 
-// METER A BOLA A COLIDIR COM BOLA
-// RODAR O TACO SELECIONADO
-// METER LIMITES NA ROTACAO DO TACO SELECIONADO
-// METER UMA BOLA NO TACO SELECIONADO
-// DISPARAR A BOLA
+// VER AS ROTAÇÕES DAS BOLAS
+// VER AS COLISOES BOLA BOLA
+// METER UMA CAMERA ATRÁS DA ULTIMA BOLA DISPARADA
 
 class SceneManager {
     constructor(canvas) {
@@ -16,10 +14,13 @@ class SceneManager {
             height: canvas.height
         };
 
+        this.ballsOnTable = 0;
+        this.N = 0;
+
         this.scene = this.buildScene();
         this.renderer = this.buildRender(this.screenDimensions);
         this.cameras = this.buildCameras(this.screenDimensions);
-        this.sceneSubjects = this.createSceneSubjects(this.scene);
+        this.createSceneSubjects(this.scene);
 
         this.selectedCueStick = 0;
     }
@@ -54,6 +55,7 @@ class SceneManager {
     
         cameras['camera1'] = this.createOrthographicCamera(0, 20, 0, { width, height });
         cameras['camera2'] = this.createPerspectiveCamera(0, 15, 15, { width, height });
+        cameras['camera3'] = this.createPerspectiveCamera(0, 0, 0, { width, height })
 
         return cameras;
     }
@@ -103,24 +105,37 @@ class SceneManager {
     }
 
     createSceneSubjects(scene) {
-        const sceneSubjects = {}
-        sceneSubjects["snookerTable"] = new SnookerTable(scene, 0, 0, 0);
-        sceneSubjects["cueStick4"] = new CueStick(4, scene, -7.5, 0.2, -13, "long");
-        sceneSubjects["cueStick5"] = new CueStick(5, scene, 7.5, 0.2, -13, "long");
-        sceneSubjects["cueStick6"] = new CueStick(6, scene, -7.5, 0.2, 13, "long");
-        sceneSubjects["cueStick7"] = new CueStick(7, scene, 7.5, 0.2, 13, "long");
-        sceneSubjects["cueStick8"] = new CueStick(8, scene, -20.5, 0.2, 0, "short");
-        sceneSubjects["cueStick9"] = new CueStick(9, scene, 20.5, 0.2, 0, "short");
-        for(let i = 0; i < 15; i++)
-            sceneSubjects["ball"+i] = new Ball(scene, this.getRandomNumber(-14,14), 0.75, this.getRandomNumber(-7.5,7.5), this.getRandomNumber(-5,5), this.getRandomNumber(-5,5));
+        this.sceneSubjects = {}
+        this.sceneSubjects["snookerTable"] = new SnookerTable(scene, 0, 0, 0);
+        this.sceneSubjects["cueStick4"] = new CueStick(4, scene, -7.5, 1, -8, "down");
+        this.sceneSubjects["cueStick5"] = new CueStick(5, scene, 7.5, 1, -8, "down");
+        this.sceneSubjects["cueStick6"] = new CueStick(6, scene, -7.5, 1, 8, "up");
+        this.sceneSubjects["cueStick7"] = new CueStick(7, scene, 7.5, 1, 8, "up");
 
-        return sceneSubjects;
+        for(let i = 0; i < this.N; i++) {
+            let x = this.getRandomNumber(-13,13);
+            let z = this.getRandomNumber(-6.5,6.5);
+            let xVel = this.getRandomNumber(-5,5);
+            let zVel = this.getRandomNumber(-5,5);
+
+            if(this.canCreateBall(x, 0.5, z)) {
+                this.sceneSubjects["ball"+i] = new Ball(i, scene, x, 0.5, z, xVel, zVel);
+                this.ballsOnTable++;
+            }
+            else
+                i--;
+        }
     }
 
     update() {
         const clockDelta = this.clock.getDelta();
+        
+        if(this.ballsOnTable != this.N) {
+            this.updateBallCamera();
+        }
 
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < this.ballsOnTable; i++) {
+            this.ballInHole(this.sceneSubjects["ball"+i]);
             this.detectCollision(this.sceneSubjects["ball"+i]);
         }
 
@@ -129,57 +144,75 @@ class SceneManager {
                 this.sceneSubjects[subject].update(clockDelta);
             }
         }
+
         this.renderer.render(this.scene, this.currentCamera);
     };
 
-    detectCollision(ball) {
-        var inHole = false;
-        for (var wall in this.sceneSubjects.snookerTable.walls) {
-            if (wall !== ball.lastCollision && this.checkCollision(ball.ball, this.sceneSubjects.snookerTable.walls[wall])) {
-                for (var hole in this.sceneSubjects.snookerTable.holes) {
-                    if (this.checkCollision(ball.ball, this.sceneSubjects.snookerTable.holes[hole])) {
-                        inHole = true;
-                    }
-                }
-                this.updateBallDirection(ball, wall, inHole);
-                ball.lastCollision = wall;
+    ballInHole(ball) {
+        let temp = new  THREE.Vector3();
+
+        for(let holePosition in this.sceneSubjects.snookerTable.holes) {
+            holePosition = this.sceneSubjects.snookerTable.holes[holePosition];
+            temp.fromArray(holePosition);
+            if(ball.ball.position.distanceTo(temp) < 0.6) {
+                ball.direction.set(0,-1,0);
+                break;
             }
-
         }
     }
 
-    checkCollision(obj1, obj2) {
-        obj1.updateMatrixWorld();
-        obj2.updateMatrixWorld();
-        obj1.geometry.computeBoundingSphere();
-        obj2.geometry.computeBoundingBox();
-        var box1 = obj1.geometry.boundingSphere.clone();
-        box1.applyMatrix4(obj1.matrixWorld);
-        var box2 = obj2.geometry.boundingBox.clone();
-        box2.applyMatrix4(obj2.matrixWorld);
-
-        return box1.intersectsBox(box2);
+    detectCollision(ball) {
+        this.detectCollisionTable(ball);
+        this.detectCollisionBall(ball);
+    }
+    
+    detectCollisionTable(ball) {
+        if(ball.ball.position.x > this.sceneSubjects.snookerTable.range.x - 0.1) {
+            ball.direction.x = -1;
+            ball.xVel = Math.cos(0) * -1 * ball.totalVelocity;
+        }
+        else if(ball.ball.position.x < -(this.sceneSubjects.snookerTable.range.x - 0.1)) {
+            ball.direction.x = 1;
+            ball.xVel = Math.cos(0) * 1 * ball.totalVelocity;
+        }
+    
+        if(ball.ball.position.z > this.sceneSubjects.snookerTable.range.z - 0.1) {
+            ball.direction.z = -1;
+            ball.zVel = Math.sin(Math.PI / 2) * -1 * ball.totalVelocity;
+        }
+        else if(ball.ball.position.z < -(this.sceneSubjects.snookerTable.range.z - 0.1)) {
+            ball.direction.z = 1;
+            ball.zVel = Math.sin(Math.PI / 2) * 1 * ball.totalVelocity;
+         }
     }
 
-    updateBallDirection(ball, wall, inHole) {
-        // METER EM FUNCOES DA BALL
-        
-        if (inHole) {
-            ball.direction.set(0, -1, 0);
-            ball.zVel = 0;
-            ball.xVel = 0;
-            return;
+    detectCollisionBall(ball1) {
+        for(let i = ball1.id + 1; i < this.ballsOnTable; i++) {
+            let ball2 = this.sceneSubjects["ball"+i];
+            if(ball1.ball.position.distanceTo(ball2.ball.position) <= 1.1) {
+                this.updateBallsDirection(ball1, ball2);
+            }
         }
+    }
 
-        if (wall === 'down' || wall === 'up') {
-            ball.direction.z *= -1;
-            ball.zVel *= -1;
-        }
+    updateBallsDirection(ball1, ball2) {
+        'use strict'
+        let dir1 = new THREE.Vector3();
+        dir1.copy(ball1.direction);        
+        ball1.direction.copy(ball2.direction);
+        ball2.direction.copy(dir1);
 
-        if (wall === 'right' || wall === 'left') {
-            ball.direction.x *= -1;
-            ball.xVel *= -1;
-        }
+        let temp = ball1.totalVelocity;
+        ball1.totalVelocity = ball2.totalVelocity;
+        ball2.totalVelocity = temp;
+
+        temp = ball1.xVel;
+        ball1.xVel = ball2.xVel;
+        ball2.xVel = temp;
+
+        temp = ball1.zVel;
+        ball1.zVel = ball2.zVel;
+        ball2.zVel = temp;
     }
 
     onWindowResize() {
@@ -193,6 +226,7 @@ class SceneManager {
         this.resizePerspectiveCamera(this.cameras.freeCamera);
         this.resizeOrthographicalCamera(this.cameras.camera1);
         this.resizePerspectiveCamera(this.cameras.camera2);
+        this.resizePerspectiveCamera(this.cameras.camera3);
     
     };
 
@@ -215,6 +249,83 @@ class SceneManager {
         }
     }
 
+    fireBall(scene, cueStick, ballNumber) {
+        let ballDirection = new THREE.Vector3();
+        cueStick.cueStick.getWorldDirection(ballDirection);
+
+        switch (cueStick.id) {
+            case 4:
+                if (this.canCreateBall(-7.5, 0.5, -6.5)) {
+                    this.sceneSubjects["ball"+ballNumber] = new Ball(ballNumber, scene, -7.5, 0.5, -6.5, ballDirection.x, ballDirection.z);
+                    this.ballsOnTable++;
+                }
+                break;
+            case 5:
+                if (this.canCreateBall(7.5, 0.5, -6.5)) {
+                    this.sceneSubjects["ball"+ballNumber] = new Ball(ballNumber, scene, 7.5, 0.5, -6.5, ballDirection.x, ballDirection.z);
+                    this.ballsOnTable++;
+                }
+                break;
+            case 6:
+                if (this.canCreateBall(-7.5, 0.5, 6.5)) {
+                    ballDirection.x *= -1;
+                    ballDirection.z *= -1;
+                    this.sceneSubjects["ball"+ballNumber] = new Ball(ballNumber, scene, -7.5, 0.5, 6.5, ballDirection.x, ballDirection.z);
+                    this.ballsOnTable++;
+                }
+                break;
+            case 7:
+                if (this.canCreateBall(7.5, 0.5, 6.5)) {
+                    ballDirection.x *= -1;
+                    ballDirection.z *= -1;
+                    this.sceneSubjects["ball"+ballNumber] = new Ball(ballNumber, scene, 7.5, 0.5, 6.5, ballDirection.x, ballDirection.z);
+                    this.ballsOnTable++;
+                }
+                break;
+        }
+    }
+
+    canCreateBall(x, y, z) {
+        for(let i = 0; i < this.ballsOnTable; i++) {
+            if(this.sceneSubjects["ball"+i].ball.position.distanceTo(new THREE.Vector3(x, y, z)) <= 1.1)
+                return false;
+        }
+        return true;
+    }
+
+    selectCueStick(cueStickId) {
+        if(cueStickId == this.selectedCueStick) {
+            this.sceneSubjects["cueStick"+cueStickId].togleCueStick();
+            this.selectedCueStick *= -1;
+        }
+        else if(this.selectedCueStick > 0) {
+            this.sceneSubjects["cueStick"+this.selectedCueStick].togleCueStick();
+            this.sceneSubjects["cueStick"+cueStickId].togleCueStick();
+            this.selectedCueStick = cueStickId;
+        }
+        else {
+            this.sceneSubjects["cueStick"+cueStickId].togleCueStick();
+            this.selectedCueStick = cueStickId;
+        }
+            
+    }
+
+    updateBallCamera() {
+        let ball = this.sceneSubjects["ball"+(this.ballsOnTable-1)];
+        
+        if(ball.totalVelocity != 0) {
+            let camera3Position = new THREE.Vector3();
+
+            camera3Position.copy(ball.ball.position);
+            camera3Position.y = 1.5;
+            camera3Position.sub(new THREE.Vector3(ball.direction.x + Math.sign(ball.direction.x), 0, ball.direction.z + Math.sign(ball.direction.z)));
+    
+            this.cameras.camera3.position.copy(camera3Position);
+
+        }
+        this.cameras.camera3.lookAt(ball.ball.position);
+    }
+
     onKeyDown(key) {
         for (var subject in this.sceneSubjects)
             if(typeof this.sceneSubjects[subject].onKeyDown === "function")
@@ -231,29 +342,30 @@ class SceneManager {
             case 50: //2
                 this.currentCamera = this.cameras.camera2;
                 break;
+            case 51: //3
+                if(this.ballsOnTable != this.N) {
+                    this.currentCamera = this.cameras.camera3;
+                }
+                break;
 
             // CueStick
             case 52: //4
-                this.selectedCueStick = 4;
-                break;
             case 53: //5
-                this.selectedCueStick = 5;
-                break;
             case 54: //6
-                this.selectedCueStick = 6;
-                break;
             case 55: //7
-                this.selectedCueStick = 7;
+                this.selectCueStick(key.keyCode - 48);
                 break;
-            case 56: //8
-                this.selectedCueStick = 8;
+
+            // fire ball
+            case 32: //space
+                if(this.selectedCueStick > 0)
+                    this.fireBall(this.scene, this.sceneSubjects["cueStick" + this.selectedCueStick], this.ballsOnTable);
                 break;
-            case 57: //9
-                this.selectedCueStick = 9;
-                break;
+
+            
         }
-    }   
-    
+    }
+
     
     onKeyUp(key) {
         for (var subject in this.sceneSubjects)
