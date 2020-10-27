@@ -1,8 +1,6 @@
 // TODO
 
-// VER AS ROTAÇÕES DAS BOLAS
 // VER AS COLISOES BOLA BOLA
-// METER UMA CAMERA ATRÁS DA ULTIMA BOLA DISPARADA
 
 class SceneManager {
     constructor(canvas) {
@@ -15,7 +13,7 @@ class SceneManager {
         };
 
         this.ballsOnTable = 0;
-        this.N = 0;
+        this.N = 15;
 
         this.scene = this.buildScene();
         this.renderer = this.buildRender(this.screenDimensions);
