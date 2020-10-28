@@ -1,7 +1,3 @@
-// TODO
-
-// VER AS COLISOES BOLA BOLA
-
 class SceneManager {
     constructor(canvas) {
 
@@ -128,6 +124,12 @@ class SceneManager {
     update() {
         const clockDelta = this.clock.getDelta();
         
+        for (var subject in this.sceneSubjects) {
+            if(typeof this.sceneSubjects[subject].update === "function"){
+                this.sceneSubjects[subject].update(clockDelta);
+            }
+        }
+
         if(this.ballsOnTable != this.N) {
             this.updateBallCamera();
         }
@@ -135,12 +137,6 @@ class SceneManager {
         for (let i = 0; i < this.ballsOnTable; i++) {
             this.ballInHole(this.sceneSubjects["ball"+i]);
             this.detectCollision(this.sceneSubjects["ball"+i]);
-        }
-
-        for (var subject in this.sceneSubjects) {
-            if(typeof this.sceneSubjects[subject].update === "function"){
-                this.sceneSubjects[subject].update(clockDelta);
-            }
         }
 
         this.renderer.render(this.scene, this.currentCamera);
@@ -152,7 +148,7 @@ class SceneManager {
         for(let holePosition in this.sceneSubjects.snookerTable.holes) {
             holePosition = this.sceneSubjects.snookerTable.holes[holePosition];
             temp.fromArray(holePosition);
-            if(ball.ball.position.distanceTo(temp) < 0.6) {
+            if(ball.ball.position.distanceTo(temp) < 0.7) {
                 ball.direction.set(0,-1,0);
                 break;
             }
@@ -165,20 +161,20 @@ class SceneManager {
     }
     
     detectCollisionTable(ball) {
-        if(ball.ball.position.x > this.sceneSubjects.snookerTable.range.x - 0.1) {
+        if(ball.ball.position.x + 0.5 >= this.sceneSubjects.snookerTable.range.x) {
             ball.direction.x = -1;
             ball.xVel = Math.cos(0) * -1 * ball.totalVelocity;
         }
-        else if(ball.ball.position.x < -(this.sceneSubjects.snookerTable.range.x - 0.1)) {
+        else if(ball.ball.position.x - 0.5 <= -this.sceneSubjects.snookerTable.range.x) {
             ball.direction.x = 1;
             ball.xVel = Math.cos(0) * 1 * ball.totalVelocity;
         }
     
-        if(ball.ball.position.z > this.sceneSubjects.snookerTable.range.z - 0.1) {
+        if(ball.ball.position.z + 0.5 >= this.sceneSubjects.snookerTable.range.z) {
             ball.direction.z = -1;
             ball.zVel = Math.sin(Math.PI / 2) * -1 * ball.totalVelocity;
         }
-        else if(ball.ball.position.z < -(this.sceneSubjects.snookerTable.range.z - 0.1)) {
+        else if(ball.ball.position.z - 0.5 <= -this.sceneSubjects.snookerTable.range.z) {
             ball.direction.z = 1;
             ball.zVel = Math.sin(Math.PI / 2) * 1 * ball.totalVelocity;
          }
@@ -187,19 +183,20 @@ class SceneManager {
     detectCollisionBall(ball1) {
         for(let i = ball1.id + 1; i < this.ballsOnTable; i++) {
             let ball2 = this.sceneSubjects["ball"+i];
-            if(ball1.ball.position.distanceTo(ball2.ball.position) <= 1.1) {
-                this.updateBallsDirection(ball1, ball2);
+
+            let normal = new THREE.Vector3()
+            normal.copy(ball1.ball.position).sub(ball2.ball.position);
+            let distance = normal.length();
+
+            if(distance <= 1.0) {
+                this.updateBallsDirection(ball1, ball2, normal, distance);
             }
         }
     }
 
-    updateBallsDirection(ball1, ball2) {
+    updateBallsDirection(ball1, ball2, normal, distance) {
         'use strict'
-        let dir1 = new THREE.Vector3();
-        dir1.copy(ball1.direction);        
-        ball1.direction.copy(ball2.direction);
-        ball2.direction.copy(dir1);
-
+        //velocity
         let temp = ball1.totalVelocity;
         ball1.totalVelocity = ball2.totalVelocity;
         ball2.totalVelocity = temp;
@@ -211,6 +208,29 @@ class SceneManager {
         temp = ball1.zVel;
         ball1.zVel = ball2.zVel;
         ball2.zVel = temp;
+
+        //translation
+        normal.multiplyScalar(0.5 * distance - 0.5);
+
+        ball1.ball.position.sub(normal);
+        ball2.ball.position.add(normal);
+
+        ball1.ball.position.y = 0.5;
+        ball2.ball.position.y = 0.5;
+
+        normal.normalize();
+
+        let dir = new THREE.Vector3();
+        dir.copy(ball1.direction).sub(ball2.direction);
+
+        normal = normal.multiplyScalar(dir.dot(normal));
+
+        ball1.direction.sub(normal);
+        ball2.direction.add(normal);
+
+        ball1.direction.y = 0;
+        ball2.direction.y = 0;
+
     }
 
     onWindowResize() {
@@ -285,7 +305,7 @@ class SceneManager {
 
     canCreateBall(x, y, z) {
         for(let i = 0; i < this.ballsOnTable; i++) {
-            if(this.sceneSubjects["ball"+i].ball.position.distanceTo(new THREE.Vector3(x, y, z)) <= 1.1)
+            if(this.sceneSubjects["ball"+i].ball.position.distanceTo(new THREE.Vector3(x, y, z)) <= 1)
                 return false;
         }
         return true;
