@@ -162,22 +162,28 @@ class SceneManager {
     
     detectCollisionTable(ball) {
         if(ball.ball.position.x + 0.5 >= this.sceneSubjects.snookerTable.range.x) {
+            ball.ball.position.x = this.sceneSubjects.snookerTable.range.x - 0.5;
             ball.direction.x = -1;
             ball.xVel = Math.cos(0) * -1 * ball.totalVelocity;
         }
         else if(ball.ball.position.x - 0.5 <= -this.sceneSubjects.snookerTable.range.x) {
+            ball.ball.position.x = -this.sceneSubjects.snookerTable.range.x + 0.5;
             ball.direction.x = 1;
             ball.xVel = Math.cos(0) * 1 * ball.totalVelocity;
         }
     
         if(ball.ball.position.z + 0.5 >= this.sceneSubjects.snookerTable.range.z) {
+            ball.ball.position.z = this.sceneSubjects.snookerTable.range.z - 0.5;
             ball.direction.z = -1;
             ball.zVel = Math.sin(Math.PI / 2) * -1 * ball.totalVelocity;
         }
         else if(ball.ball.position.z - 0.5 <= -this.sceneSubjects.snookerTable.range.z) {
+            ball.ball.position.z = -this.sceneSubjects.snookerTable.range.z + 0.5;
             ball.direction.z = 1;
             ball.zVel = Math.sin(Math.PI / 2) * 1 * ball.totalVelocity;
          }
+
+         
     }
 
     detectCollisionBall(ball1) {
@@ -220,6 +226,7 @@ class SceneManager {
 
         normal.normalize();
 
+        //direction
         let dir = new THREE.Vector3();
         dir.copy(ball1.direction).sub(ball2.direction);
 
