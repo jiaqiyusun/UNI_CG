@@ -7,16 +7,16 @@ class GlobalLight {
 		this.lamp = this.createLamp(this.light, x, y, z);
 		scene.add(this.lamp)
 		
-		const helper = new THREE.CameraHelper( this.light.shadow.camera );
-		scene.add( helper );
+		// const helper = new THREE.CameraHelper( this.light.shadow.camera );
+		// scene.add( helper );
 	}
 
 	createLamp(light, x, y, z) {
 		const lamp = new THREE.Object3D();
         const support = new THREE.Mesh(new THREE.CylinderGeometry(12.5, 12.5, 1, 50, 50), new THREE.MeshNormalMaterial());
         support.position.set(0, 1, 0);
-        lamp.add(this.lightBulb);
         lamp.add(support);
+        lamp.add(this.lightBulb);
         lamp.add(light);
         lamp.position.set(x, y, z);
 
