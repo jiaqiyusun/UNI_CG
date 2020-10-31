@@ -4,23 +4,23 @@ class GlobalLight {
 
 		this.lightBulb = this.createLightBulb();
 
-		this.globalLight = this.createGlobalLight(this.light, x, y, z);
-		scene.add(this.globalLight)
+		this.lamp = this.createLamp(this.light, x, y, z);
+		scene.add(this.lamp)
 		
 		const helper = new THREE.CameraHelper( this.light.shadow.camera );
 		scene.add( helper );
 	}
 
-	createGlobalLight(light, x, y, z) {
-		const globalLight = new THREE.Object3D();
+	createLamp(light, x, y, z) {
+		const lamp = new THREE.Object3D();
         const support = new THREE.Mesh(new THREE.CylinderGeometry(12.5, 12.5, 1, 50, 50), new THREE.MeshNormalMaterial());
         support.position.set(0, 1, 0);
-        globalLight.add(this.lightBulb);
-        globalLight.add(support);
-        globalLight.add(light);
-        globalLight.position.set(x, y, z);
+        lamp.add(this.lightBulb);
+        lamp.add(support);
+        lamp.add(light);
+        lamp.position.set(x, y, z);
 
-        return globalLight;
+        return lamp;
 	}
 
 	createLightBulb() {

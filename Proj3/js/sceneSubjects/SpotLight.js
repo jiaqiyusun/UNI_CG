@@ -9,8 +9,8 @@ class SpotLight {
 
         this.lightBulb = this.createLightBulb();
         
-        this.spotLight = this.createSpotLight(this.light, x, y, z);
-        scene.add(this.spotLight);
+        this.lamp = this.createLamp(this.light, x, y, z);
+        scene.add(this.lamp);
 
 		// const helper = new THREE.CameraHelper( this.light.shadow.camera );
 		// scene.add( helper );
@@ -37,21 +37,21 @@ class SpotLight {
 
     createLightBulb() {
         const lightBulb = new THREE.Mesh(new THREE.SphereGeometry(2, 10, 10), new THREE.MeshBasicMaterial({color: 0xffffff}));
-        
+
         return lightBulb;
     }
     
-    createSpotLight(light, x, y, z) {
-        const spotLight = new THREE.Object3D();
+    createLamp(light, x, y, z) {
+        const lamp = new THREE.Object3D();
         const cone = new THREE.Mesh(new THREE.ConeGeometry(2, 5, 20, 20), new THREE.MeshNormalMaterial());
         cone.position.set(0, 3, 0);
-        spotLight.add(this.lightBulb);
-        spotLight.add(cone);
-        spotLight.add(light);
-        spotLight.position.set(x, y, z);
-        spotLight.lookAt(0, 60,0);
+        lamp.add(this.lightBulb);
+        lamp.add(cone);
+        lamp.add(light);
+        lamp.position.set(x, y, z);
+        lamp.lookAt(0, 60,0);
 
-        return spotLight;
+        return lamp;
     }
 
 	toggleLight() {
