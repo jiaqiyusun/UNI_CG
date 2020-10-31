@@ -31,6 +31,6 @@ function onKeyUp(key) {
 }
 
 function render() {
+	sceneManager.update();
     requestAnimationFrame(render);
-    sceneManager.update();
 }

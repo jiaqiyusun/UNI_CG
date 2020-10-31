@@ -8,27 +8,30 @@ class SceneManager {
             height: canvas.height
         };
 
-        this.ballsOnTable = 0;
-        this.N = 15;
-
         this.scene = this.buildScene();
         this.renderer = this.buildRender(this.screenDimensions);
         this.cameras = this.buildCameras(this.screenDimensions);
-        this.createSceneSubjects(this.scene);
-
-        this.selectedCueStick = 0;
+        this.sceneSubjects = this.createSceneSubjects(this.scene);
     }
 
     buildScene() {
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color("#000");
+        scene.background = new THREE.Color(0x000000);
         scene.add(new THREE.AxesHelper(10));
+        this.buildFloor(scene);
 
         return scene;
     }
 
+    buildFloor(scene) {
+        scene.add(new THREE.Mesh(new THREE.BoxGeometry(100, 1, 100), new THREE.MeshNormalMaterial()));
+    }
+
     buildRender({ width, height }) {
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true});
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        
         const DPR = (window.devicePixelRatio) ? window.devicePixelRatio : 1;
         renderer.setPixelRatio(DPR);
         renderer.setSize(width, height);
@@ -41,11 +44,11 @@ class SceneManager {
     buildCameras({ width, height }) {
         var cameras = new Object()
         cameras['freeCamera'] = this.createFreeCamera(25, 25, 25, { width, height });
+        cameras['camera4'] = this.createPerspectiveCamera(0, 40, 40, { width, height });
+        cameras['camera5'] = this.createOrthographicCamera(0, 12, 25, { width, height });
+        
         this.currentCamera = cameras.freeCamera;
-    
-        cameras['camera1'] = this.createOrthographicCamera(0, 20, 0, { width, height });
-        cameras['camera2'] = this.createPerspectiveCamera(0, 15, 15, { width, height });
-
+        
         return cameras;
     }
 
@@ -94,7 +97,12 @@ class SceneManager {
     }
 
     createSceneSubjects(scene) {
-        this.sceneSubjects = {}
+        const sceneSubjects = {}
+        sceneSubjects["globalLight"] = new GlobalLight(scene, 0, 25, 0);
+        sceneSubjects["podium"] = new Podium(scene, this.cameras.camera5, 0, 1, 0);
+        sceneSubjects["sphere"] = new Sphere(scene, 0, 11.5 , 0);
+
+        return sceneSubjects;
     }
 
     update() {
@@ -118,8 +126,8 @@ class SceneManager {
         this.renderer.setSize(width, height);
 
         this.resizePerspectiveCamera(this.cameras.freeCamera);
-        this.resizeOrthographicalCamera(this.cameras.camera1);
-        this.resizePerspectiveCamera(this.cameras.camera2);    
+        this.resizeOrthographicalCamera(this.cameras.camera5);
+        this.resizePerspectiveCamera(this.cameras.camera4);    
     };
 
     resizePerspectiveCamera(camera) {
@@ -151,11 +159,11 @@ class SceneManager {
             case 48: //0
                 this.currentCamera = this.cameras.freeCamera;
                 break;
-            case 49: //1
-                this.currentCamera = this.cameras.camera1;
+            case 52: //4
+                this.currentCamera = this.cameras.camera4;
                 break;
-            case 50: //2
-                this.currentCamera = this.cameras.camera2;
+            case 53: //5
+                this.currentCamera = this.cameras.camera5;
                 break;
         }
     }
