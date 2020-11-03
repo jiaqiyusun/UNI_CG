@@ -31,14 +31,6 @@ class GlobalLight {
 
 	createLight() {
 		const light = new THREE.DirectionalLight(0xffffff, 1);
-		light.castShadow = true;
-
-		const d = 12.5;
-		light.shadow.camera.left = - d;
-		light.shadow.camera.right = d;
-		light.shadow.camera.top = d;
-		light.shadow.camera.bottom = - d;
-		light.shadow.camera.far = 35;
 
 		return light;
 	}
@@ -46,12 +38,10 @@ class GlobalLight {
 	toggleLight() {
 		if (this.light.color.getHexString() == "ffffff") {
 			this.light.color.set(0x000000);
-            this.light.castShadow = false;
             this.lightBulb.material.color.set(0x3F3F3F);
         }
 		else {
 			this.light.color.set(0xffffff);
-            this.light.castShadow = true;
             this.lightBulb.material.color.set(0xffffff);
         }
 	}

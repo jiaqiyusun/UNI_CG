@@ -10,7 +10,6 @@ class Podium {
         this.rotation["rightRotation"] = false;
 
         this.podium = this.createPodium(x, y, z);
-        this.podium.receiveShadow = true;
 
         this.podium.add(camera);
         camera.lookAt(0,11.5,0);

@@ -25,12 +25,7 @@ class SpotLight {
 
     createLight(target) {
         const light = new THREE.SpotLight(0xffffff, 1);
-		light.castShadow = true;
-
         light.target = target;
-
-        light.shadow.camera.far = 55;
-        light.shadow.camera.fov = 40;
 
         return light;
     }
@@ -57,12 +52,10 @@ class SpotLight {
 	toggleLight() {
 		if (this.light.color.getHexString() == "ffffff") {
 			this.light.color.set(0x000000);
-            this.light.castShadow = false;
             this.lightBulb.material.color.set(0x3F3F3F);
         }
 		else {
 			this.light.color.set(0xffffff);
-            this.light.castShadow = true;
             this.lightBulb.material.color.set(0xffffff);
         }
 	}
