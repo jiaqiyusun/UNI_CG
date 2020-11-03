@@ -103,7 +103,8 @@ class SceneManager {
         sceneSubjects["spotLight2"] = new SpotLight(2, scene, 25 * Math.sin(4 * Math.PI/3), 25, 25 * Math.cos(4 * Math.PI/3));
         sceneSubjects["spotLight3"] = new SpotLight(3, scene, 25 * Math.sin(2 * Math.PI), 25, 25 * Math.cos(2 * Math.PI));
         sceneSubjects["podium"] = new Podium(scene, this.cameras.camera5, 0, 1, 0);
-        sceneSubjects["sphere"] = new Sphere(scene, 0, 11.5 , 0);
+        // sceneSubjects["cybertruck"] = new Cybertruck(scene, 0, 0, 0);
+        sceneSubjects["cybertruck"] = new Cybertruck(scene);
 
         return sceneSubjects;
     }
