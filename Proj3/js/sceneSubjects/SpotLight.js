@@ -24,7 +24,7 @@ class SpotLight {
     }
 
     createLight(target) {
-        const light = new THREE.SpotLight(0xffffff, 1);
+        const light = new THREE.SpotLight(0xffffff, 0.5);
         light.target = target;
 
         return light;
@@ -50,14 +50,14 @@ class SpotLight {
     }
 
 	toggleLight() {
-		if (this.light.color.getHexString() == "ffffff") {
-			this.light.color.set(0x000000);
+		if (this.light.visible) {
             this.lightBulb.material.color.set(0x3F3F3F);
         }
 		else {
-			this.light.color.set(0xffffff);
             this.lightBulb.material.color.set(0xffffff);
-        }
+		}
+		
+		this.light.visible = !this.light.visible;
 	}
 
 	onKeyDown(key) {

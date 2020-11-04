@@ -18,13 +18,8 @@ class SceneManager {
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x000000);
         scene.add(new THREE.AxesHelper(10));
-        this.buildFloor(scene);
 
         return scene;
-    }
-
-    buildFloor(scene) {
-        scene.add(new THREE.Mesh(new THREE.BoxGeometry(100, 1, 100), new THREE.MeshNormalMaterial()));
     }
 
     buildRender({ width, height }) {
@@ -45,7 +40,7 @@ class SceneManager {
         var cameras = new Object()
         cameras['freeCamera'] = this.createFreeCamera(25, 25, 25, { width, height });
         cameras['camera4'] = this.createPerspectiveCamera(0, 50, 50, { width, height });
-        cameras['camera5'] = this.createOrthographicCamera(0, 11, 40, { width, height });
+        cameras['camera5'] = this.createOrthographicCamera(0, 10, 40, { width, height });
         
         this.currentCamera = cameras.freeCamera;
         
@@ -102,8 +97,9 @@ class SceneManager {
         sceneSubjects["spotLight1"] = new SpotLight(1, scene, 25 * Math.sin(2 * Math.PI/3), 25, 25 * Math.cos(2 * Math.PI/3));
         sceneSubjects["spotLight2"] = new SpotLight(2, scene, 25 * Math.sin(4 * Math.PI/3), 25, 25 * Math.cos(4 * Math.PI/3));
         sceneSubjects["spotLight3"] = new SpotLight(3, scene, 25 * Math.sin(2 * Math.PI), 25, 25 * Math.cos(2 * Math.PI));
-        sceneSubjects["podium"] = new Podium(scene, this.cameras.camera5, 0, 1, 0);
-        sceneSubjects["cybertruck"] = new Cybertruck(scene, 0, 9.5, 0);
+        sceneSubjects["podium"] = new Podium(scene, this.cameras.camera5, 0, 1.5, 0);
+        sceneSubjects["cybertruck"] = new Cybertruck(scene, 0, 13.5, 0);
+        sceneSubjects["floor"] = new Floor(scene);
 
         return sceneSubjects;
     }

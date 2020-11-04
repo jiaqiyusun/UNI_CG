@@ -30,20 +30,20 @@ class GlobalLight {
 	}
 
 	createLight() {
-		const light = new THREE.DirectionalLight(0xffffff, 1);
+		const light = new THREE.DirectionalLight(0xffffff, 0.5);
 
 		return light;
 	}
 
 	toggleLight() {
-		if (this.light.color.getHexString() == "ffffff") {
-			this.light.color.set(0x000000);
+		if (this.light.visible) {
             this.lightBulb.material.color.set(0x3F3F3F);
         }
 		else {
-			this.light.color.set(0xffffff);
             this.lightBulb.material.color.set(0xffffff);
-        }
+		}
+		
+		this.light.visible = !this.light.visible;
 	}
 
 	onKeyDown(key) {

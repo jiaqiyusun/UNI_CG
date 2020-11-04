@@ -1,9 +1,9 @@
 class Podium {
     constructor(scene, camera, x, y, z) {
         this.materials = new Object;
-        this.materials["basic"] = new THREE.MeshBasicMaterial({color: 0xE62272});
-        this.materials["lambert"] = new THREE.MeshLambertMaterial({color: 0xE62272});
-        this.materials["phong"] = new THREE.MeshPhongMaterial({color: 0xE62272});
+        this.materials["basic"] = new THREE.MeshBasicMaterial({color: 0x40e0d0});
+        this.materials["lambert"] = new THREE.MeshLambertMaterial({color: 0x40e0d0});
+        this.materials["phong"] = new THREE.MeshPhongMaterial({color: 0x40e0d0});
 
         this.rotation = new Object;
         this.rotation["leftRotation"] = false;
@@ -18,7 +18,7 @@ class Podium {
     }
 
     createPodium(x, y, z) {
-        const podium = new THREE.Mesh(new THREE.CylinderGeometry(20, 20, 1, 50), this.materials.basic);
+        const podium = new THREE.Mesh(new THREE.CylinderGeometry(20, 25, 3, 20), this.materials.basic);
         podium.position.set(x, y, z);
 
         return podium;

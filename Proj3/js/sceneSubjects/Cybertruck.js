@@ -44,7 +44,7 @@ class Cybertruck {
 		this.cybertruck.add(this.wheels.axis1);
 		this.cybertruck.add(this.wheels.axis2);
 
-		this.cybertruck.scale.set(2, 2, 2);
+		this.cybertruck.scale.set(2.8, 2.8, 2.8);
 		this.cybertruck.position.set(x,y,z);
 		scene.add(this.cybertruck);
 	}
