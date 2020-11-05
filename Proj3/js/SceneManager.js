@@ -75,7 +75,7 @@ class SceneManager {
     }
 
     createOrthographicCamera(x, y, z, { width, height }) {
-        let camera = new THREE.OrthographicCamera(
+        const camera = new THREE.OrthographicCamera(
             -(0.025 * width) / 2,     // left
             (0.025 * width) / 2,      // right
             (0.025 * height) / 2,    //top
