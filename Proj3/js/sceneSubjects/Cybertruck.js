@@ -29,7 +29,7 @@ class Cybertruck {
 		this.glassesGeometry = this.createGlassesGeometry();
 		this.wheels = this.createWheels();
 
-		this.cybertruckMap = {}
+		this.cybertruckMap = new Object;
 		this.cybertruckMap['cybertruck'] = new THREE.Mesh(this.cybertruckGeometry, this.materials.cybertruckBasic);
 		this.cybertruckMap['lights'] = new THREE.Mesh(this.lightsGeometry, this.materials.lightsBasic);
 		this.cybertruckMap['glasses'] = new THREE.Mesh(this.glassesGeometry, this.materials.glassesBasic);
