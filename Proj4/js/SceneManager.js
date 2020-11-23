@@ -36,7 +36,6 @@ class SceneManager {
 
     buildScene() {
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x000000);
         // scene.add(new THREE.AxesHelper(10));
 
         return scene;
