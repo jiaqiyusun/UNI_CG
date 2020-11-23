@@ -1,5 +1,3 @@
-console.warn( "THREE.OrbitControls: As part of the transition to ES6 Modules, the files in 'examples/js' were deprecated in May 2020 (r117) and will be deleted in December 2020 (r124). You can find more information about developing using ES6 Modules in https://threejs.org/docs/#manual/en/introduction/Installation." );
-
 // This set of controls performs orbiting, dollying (zooming), and panning.
 // Unlike TrackballControls, it maintains the "up" direction object.up (+Y by default).
 //
@@ -773,6 +771,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 		switch ( event.pointerType ) {
 
 			case 'mouse':
+			case 'pen':
 				onMouseDown( event );
 				break;
 
@@ -789,6 +788,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 		switch ( event.pointerType ) {
 
 			case 'mouse':
+			case 'pen':
 				onMouseMove( event );
 				break;
 
@@ -805,6 +805,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 		switch ( event.pointerType ) {
 
 			case 'mouse':
+			case 'pen':
 				onMouseUp( event );
 				break;
 
@@ -1183,6 +1184,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 	// force an update at start
 
 	this.update();
+
 };
 
 THREE.OrbitControls.prototype = Object.create( THREE.EventDispatcher.prototype );
