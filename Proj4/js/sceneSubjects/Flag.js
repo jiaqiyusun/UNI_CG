@@ -1,5 +1,13 @@
 class Flag {
     constructor(scene, x, y, z) {
+        this.initialValues = {
+            x: x,
+            y: y,
+            z: z,
+            angle: 0,
+            wireframe: false
+        }
+
         this.materials = new Object;
         this.materials["basic"] = new THREE.MeshBasicMaterial({color: 0x40e0d0});
         this.materials["phong"] = new THREE.MeshPhongMaterial({color: 0x40e0d0});
@@ -7,6 +15,13 @@ class Flag {
         this.flag = this.createFlag(x, y, z);
 
         scene.add(this.flag);
+    }
+
+    reset() {
+        this.flag.position.set(this.initialValues.x, this.initialValues.y, this.initialValues.z);
+        this.flag.material.wireframe = this.initialValues.wireframe;
+        this.flag.material = this.materials.phong;
+        this.flag.rotation.y = this.initialValues.angle;
     }
 
     createFlag(x, y, z) {

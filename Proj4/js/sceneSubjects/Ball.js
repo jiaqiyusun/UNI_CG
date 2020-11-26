@@ -1,5 +1,14 @@
 class Ball {
     constructor(scene, x, y, z) {
+        this.initialValues = {
+            x: x,
+            y: y,
+            z: z,
+            ballStep: 0,
+            isBallJumping: false,
+            wireframe: false
+        }
+
         const textureLoader = new THREE.TextureLoader();
 
         this.ballBumpMap = new textureLoader.load("images/ballBump.png");
@@ -8,12 +17,20 @@ class Ball {
         this.materials["basic"] = new THREE.MeshBasicMaterial({color: 0xffffff});
         this.materials["phong"] = new THREE.MeshPhongMaterial({color: 0xffffff, bumpMap: this.ballBumpMap});
 
-        this.ballJumping = false;
-        this.ballStep = 0;
+        this.isBallJumping = this.initialValues.isBallJumping;
+        this.ballStep = this.initialValues.ballStep;
 
-        this.ball = this.createBall(x, y, z);
+        this.ball = this.createBall(this.initialValues.x, this.initialValues.y, this.initialValues.z);
 
         scene.add(this.ball);
+    }
+
+    reset() {
+        this.ball.position.set(this.initialValues.x, this.initialValues.y, this.initialValues.z);
+        this.ball.material.wireframe = this.initialValues.wireframe;
+        this.ball.material = this.materials.phong;
+        this.ballStep = this.initialValues.ballStep;
+        this.isBallJumping = this.initialValues.isBallJumping;
     }
 
     createBall(x, y, z) {
@@ -44,13 +61,13 @@ class Ball {
                 this.toggleMaterialI();
                 break;
             case 66: //B
-                this.ballJumping = !this.ballJumping;
+                this.isBallJumping = !this.isBallJumping;
                 break;
         }
     }
 
     update(time) {
-        if (this.ballJumping) {
+        if (this.isBallJumping) {
             this.ballStep += time;
             this.ball.position.y = Math.abs(30 * (Math.sin(this.ballStep))) + 1.5;
             this.ball.position.z = 10 * (Math.cos(this.ballStep)) - 10;

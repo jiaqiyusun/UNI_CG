@@ -1,11 +1,19 @@
 class DirectionalLight {
 	constructor(scene, x, y, z) {
-		this.light = this.createLight(x, y, z);
+		this.initialValues = {
+            x: x,
+            y: y,
+            z: z,
+		}
+		
+		this.light = this.createLight(this.initialValues.x, this.initialValues.y, this.initialValues.z);
 
-		scene.add(this.light)
-		// this.light.castShadow = true;
-		// const helper = new THREE.CameraHelper( this.light.shadow.camera );
-		// scene.add( helper );
+		scene.add(this.light);
+	}
+
+	reset() {
+		this.light.position.set(this.initialValues.x, this.initialValues.y, this.initialValues.z);
+		this.light.visible = true;
 	}
 
 	createLight(x, y, z) {

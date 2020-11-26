@@ -1,22 +1,26 @@
-// ver o problema do OrbitsControl
+// reset
 class SceneManager {
     constructor(canvas) {
-
         this.clock = new THREE.Clock();
 
         this.screenDimensions = {
-            width: canvas.width,
-            height: canvas.height
+            width: window.innerWidth,
+            height: window.innerHeight
         };
+        this.viewSize = 35;
 
-        this.sceneBackground = this.BuildSceneBackground();
+        this.isScenePaused = false;
+
         this.scene = this.buildScene();
+        this.scenePause = this.buildScenePause();
+        this.sceneBackground = this.buildSceneBackground();
         this.renderer = this.buildRender(this.screenDimensions);
         this.cameras = this.buildCameras(this.screenDimensions);
         this.sceneSubjects = this.createSceneSubjects(this.scene);
+        this.scenePauseSubjects = this.createScenePauseSubjects(this.scenePause);
     }
 
-    BuildSceneBackground() {
+    buildSceneBackground() {
         const sceneBackground = new THREE.Scene();
 
         const loader = new THREE.CubeTextureLoader();
@@ -41,6 +45,12 @@ class SceneManager {
         return scene;
     }
 
+    buildScenePause() {
+        const scene = new THREE.Scene();
+
+        return scene
+    }
+
     buildRender({ width, height }) {
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true});
         renderer.autoClear = false;
@@ -55,10 +65,12 @@ class SceneManager {
     }
 
     buildCameras({ width, height }) {
-        var cameras = new Object()
-        cameras['freeCamera'] = this.createFreeCamera(25, 25, 25, { width, height });
+        const aspect = width / height;
 
-        this.currentCamera = cameras.freeCamera;
+        var cameras = new Object()
+        cameras['mainCamera'] = this.createFreeCamera(25, 25, 25, aspect);
+        cameras['pauseCamera'] = this.createOrthographicCamera(0, 0, 50, aspect);
+        this.currentCamera = cameras.mainCamera;
         
         return cameras;
     }
@@ -74,46 +86,55 @@ class SceneManager {
         return freeCamera;
     }
 
-    createPerspectiveCamera(x, y, z, { width, height }) {
+    createPerspectiveCamera(x, y, z, aspect) {
         let camera = new THREE.PerspectiveCamera(
             70,     // FOV
-            width / height,     // Aspect Ratio
+            aspect,     // Aspect Ratio
             1,      // Near plane
             1000        //Far plane
         );
-    
-        camera.position.set(x, y, z);  
+        camera.position.set(x, y, z);
 
         return camera;
     }
 
-    createOrthographicCamera(x, y, z, { width, height }) {
+    createOrthographicCamera(x, y, z, aspect) {
         const camera = new THREE.OrthographicCamera(
-            -(0.025 * width) / 2,     // left
-            (0.025 * width) / 2,      // right
-            (0.025 * height) / 2,    //top
-            -(0.025 * height) / 2,     // bottom
+            this.viewSize * aspect / -2,   // left
+            this.viewSize * aspect / 2,   // right
+            this.viewSize / 2,              //top
+            this.viewSize / -2,          // bottom
             1,                                  // near
             1000,                               // far
         );
-        
         camera.position.set(x, y, z);
     
         return camera;
     }
 
     createSceneSubjects(scene) {
-        const sceneSubjects = {}
+        const sceneSubjects = {};
         sceneSubjects["directionalLight"] = new DirectionalLight(scene, 10, 10, 0);
         sceneSubjects["pointLight"] = new PointLight(scene, 0, 30, 0);
         sceneSubjects["flag"] = new Flag(scene, 0, 10, -10);
         sceneSubjects["ball"] = new Ball(scene, 0, 1.5, 0);
         sceneSubjects["grass"] = new Grass(scene, 0, 0, 0);
+
         return sceneSubjects;
     }
 
+    createScenePauseSubjects(scene) {
+        const scenePauseSubjects = {};
+        scenePauseSubjects["pauseScreen"] = new PauseScreen(scene, 0, 0, 0);
+        
+        return scenePauseSubjects;
+    }
+
     update() {
-        const clockDelta = this.clock.getDelta();
+        let clockDelta = this.clock.getDelta();
+        if(this.isScenePaused) {
+            clockDelta = 0;
+        }
         
         for (var subject in this.sceneSubjects) {
             if(typeof this.sceneSubjects[subject].update === "function"){
@@ -121,41 +142,57 @@ class SceneManager {
             }
         }
 
+        for (var subject in this.scenePauseSubjects) {
+            if(typeof this.scenePauseSubjects[subject].update === "function"){
+                this.scenePauseSubjects[subject].update(clockDelta);
+            }
+        }
+
         this.controls.update();
+
         this.renderer.clear();
         this.renderer.render(this.sceneBackground, this.currentCamera);
-        this.renderer.clearDepth();
         this.renderer.render(this.scene, this.currentCamera);
+        this.renderer.clearDepth();
+        this.renderer.render(this.scenePause, this.cameras.pauseCamera);
     };
 
     onWindowResize() {
-        const { width, height } = canvas;
-
-        this.screenDimensions.width = width;
-        this.screenDimensions.height = height;
+        this.screenDimensions.width = window.innerWidth;
+        this.screenDimensions.height = window.innerHeight;
         
-        this.renderer.setSize(width, height);
+        this.renderer.setSize(this.screenDimensions.width, this.screenDimensions.height);
 
-        this.resizePerspectiveCamera(this.cameras.freeCamera);   
+        const aspect = this.screenDimensions.width / this.screenDimensions.height;
+        this.resizePerspectiveCamera(this.cameras.mainCamera, aspect);
+        this.resizeOrthographicalCamera(this.cameras.pauseCamera, aspect);
     };
 
-    resizePerspectiveCamera(camera) {
+    resizePerspectiveCamera(camera, aspect) {
         if (this.screenDimensions.height > 0 && this.screenDimensions.width > 0) {
-            camera.aspect = this.screenDimensions.width / this.screenDimensions.height;
+            camera.aspect = aspect;
 
             camera.updateProjectionMatrix();
         }
     }
 
-    resizeOrthographicalCamera(camera) {    
-        if (this.screenDimensions.height > 0 && this.screenDimensions.width > 0) {
-            camera.left = -0.025 * this.screenDimensions.width / 2,     // left
-            camera.right = 0.025 * this.screenDimensions.width / 2,      // right
-            camera.top = 0.025 * this.screenDimensions.height / 2,    //top
-            camera.bottom = -0.025 * this.screenDimensions.height / 2,     // bottom
+    resizeOrthographicalCamera(camera, aspect) {    
+        if (this.screenDimensions.height > 0 && this.screenDimensions.width > 0) {            
+            camera.left = this.viewSize * aspect / -2,     // left
+            camera.right = this.viewSize * aspect / 2,      // right
+            camera.top = this.viewSize / 2,    //top
+            camera.bottom = this.viewSize / -2,     // bottom
     
             camera.updateProjectionMatrix();
         }
+    }
+
+    reset() {
+        for (var subject in this.sceneSubjects)
+            if(typeof this.sceneSubjects[subject].reset === "function")
+                this.sceneSubjects[subject].reset();
+
+        this.controls.reset();
     }
 
     onKeyDown(key) {
@@ -163,12 +200,22 @@ class SceneManager {
             if(typeof this.sceneSubjects[subject].onKeyDown === "function")
                 this.sceneSubjects[subject].onKeyDown(key);
 
-        switch (key.keyCode) {
+        for (var subject in this.scenePauseSubjects)
+            if(typeof this.scenePauseSubjects[subject].onKeyDown === "function")
+                this.scenePauseSubjects[subject].onKeyDown(key);
 
+        switch (key.keyCode) {
+            case 83: //S
+                this.isScenePaused = !this.isScenePaused;
+                break;
+            case 82: //R
+                if(this.isScenePaused) {
+                    this.reset();
+                    this.isScenePaused = false;
+                }
         }
     }
 
-    
     onKeyUp(key) {
         for (var subject in this.sceneSubjects)
             if(typeof this.sceneSubjects[subject].onKeyUp === "function")
