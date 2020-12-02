@@ -15,7 +15,7 @@ class Ball {
         
         this.materials = new Object;
         this.materials["basic"] = new THREE.MeshBasicMaterial({color: 0xffffff});
-        this.materials["phong"] = new THREE.MeshPhongMaterial({color: 0xffffff, bumpMap: this.ballBumpMap});
+        this.materials["phong"] = new THREE.MeshPhongMaterial({color: 0xffffff, shininess: 100, bumpMap: this.ballBumpMap});
 
         this.isBallJumping = this.initialValues.isBallJumping;
         this.ballStep = this.initialValues.ballStep;
