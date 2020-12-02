@@ -27,7 +27,8 @@ class Ball {
 
     reset() {
         this.ball.position.set(this.initialValues.x, this.initialValues.y, this.initialValues.z);
-        this.ball.material.wireframe = this.initialValues.wireframe;
+        this.materials.basic.wireframe = this.initialValues.wireframe;
+        this.materials.phong.wireframe = this.initialValues.wireframe;
         this.ball.material = this.materials.phong;
         this.ballStep = this.initialValues.ballStep;
         this.isBallJumping = this.initialValues.isBallJumping;
@@ -48,7 +49,8 @@ class Ball {
     }
 
     toggleWireframeW() {
-        this.ball.material.wireframe = !this.ball.material.wireframe
+        this.materials.basic.wireframe = !this.materials.basic.wireframe
+        this.materials.phong.wireframe = !this.materials.phong.wireframe
     }
 
     onKeyDown(key) {

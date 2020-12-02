@@ -26,7 +26,8 @@ class Grass {
     }
 
     reset() {
-        this.grass.material.wireframe = this.initialValues.wireframe;
+        this.materials.basic.wireframe = this.initialValues.wireframe;
+        this.materials.phong.wireframe = this.initialValues.wireframe;
         this.grass.material = this.materials.phong;
     }
 
@@ -44,7 +45,8 @@ class Grass {
     }
 
     toggleWireframeW() {
-        this.grass.material.wireframe = !this.grass.material.wireframe
+        this.materials.basic.wireframe = !this.materials.basic.wireframe
+        this.materials.phong.wireframe = !this.materials.phong.wireframe
     }
 
     onKeyDown(key) {

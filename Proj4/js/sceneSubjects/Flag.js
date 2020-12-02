@@ -12,38 +12,52 @@ class Flag {
         this.materials["basic"] = new THREE.MeshBasicMaterial({color: 0x40e0d0});
         this.materials["phong"] = new THREE.MeshPhongMaterial({color: 0x40e0d0});
 
-        this.flag = this.createFlag(x, y, z);
+        this.flagMeshs = this.createFlagMeshs(x, y, z);
 
-        scene.add(this.flag);
+        scene.add(this.flagMeshs.flag);
     }
 
     reset() {
-        this.flag.position.set(this.initialValues.x, this.initialValues.y, this.initialValues.z);
-        this.flag.material.wireframe = this.initialValues.wireframe;
-        this.flag.material = this.materials.phong;
-        this.flag.rotation.y = this.initialValues.angle;
+        this.materials.basic.wireframe = this.initialValues.wireframe;
+        this.materials.phong.wireframe = this.initialValues.wireframe;
+        this.flagMeshs.square.material = this.materials.basic;
+        this.flagMeshs.stick.material = this.materials.phong;
+        this.flagMeshs.flag.rotation.y = this.initialValues.angle;
     }
 
-    createFlag(x, y, z) {
-        const flag = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 20, 20), this.materials.phong);
+    createFlagMeshs(x, y, z) {
+        const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 20, 20), this.materials.phong);
         const square = new THREE.Mesh(new THREE.BoxGeometry(5, 5, 0.5), this.materials.phong);
         square.position.set(2.5, 7.5, 0);
-    
-        flag.add(square)
+        
+        const flag = new THREE.Mesh;
+        flag.add(stick);
+        flag.add(square);
         flag.position.set(x, y, z);
 
-        return flag;
+        const flagMeshs = {}
+        flagMeshs["stick"] = stick
+        flagMeshs["square"] = square
+        flagMeshs["flag"] = flag
+
+        return flagMeshs;
     }
 
     toggleMaterialI() {
-        if(this.flag.material.type == "MeshBasicMaterial")
-            this.flag.material = this.materials.phong;
-        else
-            this.flag.material = this.materials.basic;
+        if(this.flagMeshs.stick.material.type == "MeshBasicMaterial") {
+            this.flagMeshs.stick.material = this.materials.phong;
+            this.flagMeshs.square.material = this.materials.phong;
+        }
+        else {
+            this.flagMeshs.stick.material = this.materials.basic;
+            this.flagMeshs.square.material = this.materials.basic;
+        }
+
     }
 
     toggleWireframeW() {
-        this.flag.material.wireframe = !this.flag.material.wireframe
+        this.materials.basic.wireframe = !this.materials.basic.wireframe
+        this.materials.phong.wireframe = !this.materials.phong.wireframe
     }
 
     onKeyDown(key) {
@@ -59,6 +73,6 @@ class Flag {
     }
 
     update(time) {
-        this.flag.rotateY(time);
+        this.flagMeshs.flag.rotateY(time);
     }
 }
